@@ -1,0 +1,76 @@
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+/>
+<div class="main">
+  <p id="logo"><i class="fa fa-music"></i>Music</p>
+
+  <!--- left part --->
+  <div class="left">
+    <!--- song img --->
+    <img
+      src="https://images.unsplash.com/photo-1499415479124-43c32433a620?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxjb2xsZWN0aW9uLXBhZ2V8MXwxNTMxNTY2fHxlbnwwfHx8fA%3D%3D&w=1000&q=80"
+      id="track_image"
+      alt=""
+    />
+    <div class="volume">
+      <p id="volume_show"></p>
+      <i
+        class="fa fa-volume-up"
+        aria-hidden="true"
+        (click)="pause()"
+        id="volume_icon"
+      ></i>
+      <input
+        type="range"
+        min="0"
+        max="100"
+        value="90"
+        step="0.01"
+        (input)="volume_change($event)"
+      />
+    </div>
+  </div>
+
+  <!--- right part --->
+  <div class="right">
+    <h2 id="title">List Music</h2>
+    <ul>
+      <li
+        class="artist"
+        *ngFor="let file of files"
+        (click)="openFile(file.url)"
+      >
+        {{ file.name }}
+      </li>
+    </ul>
+
+    <!--- middle part --->
+    <div class="middle">
+      <button (click)="prev()" id="pre">
+        <i class="fa fa-step-backward" aria-hidden="true"></i>
+      </button>
+      <button (click)="play()" id="play">
+        <i class="fa fa-play" aria-hidden="true"></i>
+      </button>
+      <button (click)="next()" id="next">
+        <i class="fa fa-step-forward" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <!--- song duration part --->
+    <span>{{ currentTime }}</span>
+    <div class="duration">
+      <input
+        type="range"
+        min="0"
+        max="{{ duration }}"
+        value="{{ currentTime }}"
+        id="duration_slider"
+        onchange="change_duration()"
+      />
+    </div>
+    <span>{{ duration }}</span>
+    <button id="auto" onclick="autoplay_switch()"></button>
+  </div>
+</div>
