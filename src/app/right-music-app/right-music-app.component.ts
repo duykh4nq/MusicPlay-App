@@ -1,15 +1,16 @@
-import { Music } from '../music';
 import { Component, OnInit } from '@angular/core';
-import * as moment from 'moment';
+import { Music } from '../music';
 import { Observable, fromEvent } from 'rxjs';
 import { MUSICS } from 'app/list-music';
 
 @Component({
-  selector: 'app-home-music',
-  templateUrl: './home-music.component.html',
-  styleUrls: ['./home-music.component.css'],
+  selector: 'app-right-music-app',
+  templateUrl: './right-music-app.component.html',
+  styleUrls: ['./right-music-app.component.css']
 })
-export class HomeMusicComponent implements OnInit {
+export class RightMusicAppComponent implements OnInit {
+  files: Music[] = MUSICS;
+  audioObj = new Audio();
   audioEvents = [
     'ended',
     'error',
@@ -20,17 +21,15 @@ export class HomeMusicComponent implements OnInit {
     'canplay',
     'loadstart',
   ];
+  constructor() { }
 
-  // Data
-  files: Music[] = MUSICS;
-
-  // biến
-  audioObj = new Audio();
   _title = 'List Music';
   currentTime = '00:00';
   duration = '00:00';
   seek;
+  seek2 = 0;
   buffer = 0;
+  local = '';
   volumes = 100;
   mute = 'fa fa-volume-up';
   play_pause = 'fa fa-play';
@@ -40,19 +39,19 @@ export class HomeMusicComponent implements OnInit {
   name_music = 'Please choose the song';
   name_singer = '';
   lyric = '';
+  tmp = 0;
   searchText;
   hidden_item = '';
   visible_item = 'visible_item';
-  volumeBarWidth;
 
   // Play music
   openFile(url, id) {
     this.index = id;
     this.hidden_item = 'hidden_item';
-    this._title = 'Lyrics';
     this.visible_item = '';
     this.streamObserver(url).subscribe((event) => { });
     this.play();
+    this._title = 'Lyrics';
     this.lyric = this.files[this.index].description;
   }
   goBack() {
@@ -70,24 +69,7 @@ export class HomeMusicComponent implements OnInit {
     this.audioObj.pause();
   }
   control_music() {
-    if (this.name_music != 'Please choose the song') {
-      this.play_pause == 'fa fa-play' ? this.play() : this.pause();
-    }
-  }
-
-  // Control volume
-  mute_volume() {
-    this.audioObj.volume = 0;
-    this.mute = 'fa fa-volume-off';
-    this.volumes = 0;
-  }
-  unmute_volume() {
-    this.audioObj.volume = 1;
-    this.mute = 'fa fa-volume-up';
-    this.volumes = Math.floor(this.volumeBarWidth * 100);
-  }
-  control_volume() {
-    this.mute == 'fa fa-volume-up' ? this.mute_volume() : this.unmute_volume();
+    this.play_pause == 'fa fa-play' ? this.play() : this.pause();
   }
 
   // Control music
@@ -128,7 +110,7 @@ export class HomeMusicComponent implements OnInit {
     } else this.color_redo = 'rgba(255, 255, 255, 0.1)';
   }
   redo() {
-    if (this.audioObj.currentTime == this.audioObj.duration) {
+    if (this.seek == this.audioObj.duration) {
       this.audioObj.loop;
       this.play();
     }
@@ -142,24 +124,19 @@ export class HomeMusicComponent implements OnInit {
     } else this.color_random = 'rgba(255, 255, 255, 0.1)';
   }
   random_() {
-    let tmp = Math.floor(Math.random() * this.files.length);
-    if (tmp == this.index) {
+    this.tmp = Math.floor(Math.random() * this.files.length);
+    if (this.tmp == this.index) {
       return this.random_();
     }
-    return tmp;
+    return this.tmp;
   }
   random_music() {
-    if (this.audioObj.currentTime == this.audioObj.duration) {
+    if (this.seek == this.audioObj.duration) {
       this.openFile(this.files[this.random_()].url, this.random_());
       this.play();
     }
   }
 
-  // format time
-  timeFormat(time, format = 'mm:ss') {
-    const momentTime = time * 1000;
-    return moment.utc(momentTime).format(format);
-  }
 
   addEvents(obj, events, handler) {
     events.forEach((element) => {
@@ -177,18 +154,6 @@ export class HomeMusicComponent implements OnInit {
 
       const handler = () => {
         if (this.audioObj.currentTime > 0) {
-          this.seek =
-            (this.audioObj.currentTime / this.audioObj.duration) * 100;
-          this.duration = this.timeFormat(this.audioObj.duration);
-          this.currentTime = this.timeFormat(this.audioObj.currentTime);
-
-
-          for (let i = 0; i < this.audioObj.buffered.length; i++) {
-            if (this.audioObj.buffered.start(this.audioObj.buffered.length - 1 - i) < this.audioObj.currentTime) {
-              this.buffer = (100 * this.audioObj.buffered.end(this.audioObj.buffered.length - 1 - i)) / this.audioObj.duration;
-            }
-            break;
-          }
 
           if (this.color_random == '#FF8A65') {
             this.random_music();
@@ -206,24 +171,7 @@ export class HomeMusicComponent implements OnInit {
     });
   }
 
-  volume_change(e) {
-    const width = e.offsetX;
-    this.volumeBarWidth = width / 140;
-    this.audioObj.volume = this.volumeBarWidth;
-    this.volumes = Math.floor(this.audioObj.volume * 100);
-    if (this.audioObj.volume == 0) {
-      this.mute = 'fa fa-volume-off';
-    } else this.mute = 'fa fa-volume-up';
+  ngOnInit(): void {
   }
 
-  change_music(e) {
-    if (this.name_music != 'Please choose the song') {
-      const width = e.offsetX;
-      const progressBarWidth = (width / 200) * 100;
-      this.seek = progressBarWidth;
-      this.audioObj.currentTime = (width * this.audioObj.duration) / 200;
-    }
-  }
-
-  ngOnInit(): void { }
 }
